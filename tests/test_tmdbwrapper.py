@@ -8,11 +8,9 @@ tmdb_vcr = vcr.VCR(filter_query_parameters=['api_key'])
 @fixture
 def tv_keys():
     # Responsible only for returning the test data
-    return ['poster_path', 'overview', 'type', 'networks',
-            'original_name', 'created_by', 'id', 'languages',
-            'original_language', 'status', 'last_air_date',
-            'first_air_date', 'seasons', 'backdrop_path',
-            'name', 'homepage', 'popularity', 'vote_average']
+    return ['id', 'origin_country', 'poster_path', 'name',
+            'overview', 'popularity', 'backdrop_path',
+            'first_air_date', 'vote_count', 'vote_average']
 
 
 @tmdb_vcr.use_cassette('tests/vcr_cassettes/tv-info.yml')
@@ -30,10 +28,12 @@ def test_tv_info(tv_keys):
 
 
 @tmdb_vcr.use_cassette('tests/vcr_cassettes/tv-popular.yml')
-def test_tv_popular():
+def test_tv_popular(tv_keys):
     """Tests an API call to get a popular tv shows"""
 
     response = TV.popular()
 
     assert isinstance(response, dict)
     assert isinstance(response['results'], list)
+    assert isinstance(response['results'][0], dict)
+    assert set(tv_keys).issubset(response['results'][0].keys())
